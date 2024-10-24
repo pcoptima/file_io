@@ -11,6 +11,24 @@ import json
 file_save = 'history_link.json'
 
 
+def show_history():
+    if not os.path.exists(file_save):
+        mb.showinfo(title='Информация', message='История пуста')
+        return
+    window_history = Toplevel()
+    window_history.title('История')
+    name_listbox = Listbox(window_history, width=50)
+    name_listbox.pack(side=LEFT)
+    link_listbox = Listbox(window_history, width=50)
+    link_listbox.pack(side=LEFT)
+
+    with open(file_save, 'r') as file:
+        content = json.load(file)
+        for i in content:
+            name_listbox.insert(END, i['name_file'])
+            link_listbox.insert(END, i['link'])
+
+
 def save_history(file_save, link, file):
     history = []
     if os.path.exists(file_save):
@@ -51,5 +69,9 @@ btn.pack(pady=10)
 
 e = Entry(window, width=30, font=("arial", 14))
 e.pack(pady=10)
+
+btn_history = Button(window, text='Посмотреть историю', font=("arial", 14),
+                     command=show_history)
+btn_history.pack()
 
 window.mainloop()
