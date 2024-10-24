@@ -3,16 +3,42 @@ import requests
 from tkinter import filedialog as fd
 from tkinter import ttk
 from tkinter import messagebox as mb
+import pyperclip
+import os
+import json
+
+
+file_save = 'history_link.json'
+
+
+def save_history(file_save, link, file):
+    history = []
+    if os.path.exists(file_save):
+        with open(file_save, 'r') as f:
+            history = json.load(f)
+    history.append({'name_file': os.path.basename(file),
+                    'link': link,
+                    'save_file': os.path.basename(file_save)})
+    with open(file_save, 'w') as f:
+        json.dump(history, f, indent=4)
 
 
 def get_response():
-    file = fd.askopenfilename()
-    if file:
-        f = {'file': open(file, 'rb')}
-        answer_json = requests.post('https://file.io', files=f)
-        if answer_json.status_code == 200:
-            link = answer_json.json()['link']
-            e.insert(0, link)
+    try:
+        file = fd.askopenfilename()
+        if file:
+            with open(file, 'rb') as fi:
+                f = {'file': fi}
+                answer_json = requests.post('https://file.io', files=f)
+                if answer_json.status_code == 200:
+                    link = answer_json.json()['link']
+                    e.delete(0, END)
+                    e.insert(0, link)
+                    pyperclip.copy(link)
+                    save_history(file_save, link, file)
+
+    except Exception as exc:
+        mb.showerror('Ошибка', message=f'Произошла ошибка: {exc}')
 
 
 window = Tk()
